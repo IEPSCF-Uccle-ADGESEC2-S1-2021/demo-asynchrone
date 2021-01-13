@@ -156,3 +156,86 @@ q1 --> proc1
 q2 <-- proc1
 receiver <-- q2
 @enduml
+
+@startuml envoi_email_traditionnel
+node client_machine as "Machine utilisateur" {
+  agent client as "Client email"
+}
+node provider_server as "Machine FAI" {
+  node provider_smtp as "Serveur SMTP relais" {
+    component provider_receiver as "récepteur"
+    queue provider_queue as "file d'attente"
+    component provider_sender as "émetteur"
+  }
+}
+cloud Internet
+node receiver_server as "Machine destinataire" {
+  node receiver_smtp as "Serveur SMTP" {
+    component receiver_receiver as "récepteur"
+  }
+  database receiver_mailboxes as "Boîtes email" {
+    artifact receiver_mailbox1 as "ma@destination.com"
+    artifact receiver_mailbox2 as "...@destination.com"
+  }
+}
+
+client - provider_receiver : SMTP
+provider_receiver - provider_queue
+provider_queue - provider_sender
+provider_sender - Internet
+Internet - receiver_receiver : SMTP
+receiver_receiver -- receiver_mailbox1
+receiver_receiver -- receiver_mailbox2
+@enduml
+
+@startuml lecture_email_traditionnel
+node server as "Machine FAI" {
+  database mailboxes as "Boîtes email" {
+    artifact mailbox1 as "user1@fai.com"
+    artifact mailbox2 as "user2@fai.com"
+  }
+  node pop3 as "Serveur POP3"
+  node imap as "Serveur IMAP"
+}
+node client_machine as "Machine utilisateur" {
+  agent client as "Client email"
+}
+
+mailbox1 -- pop3
+mailbox2 -- pop3
+imap -- mailbox1
+imap -- mailbox2
+
+imap - client : IMAP
+pop3 - client : POP3
+@enduml
+
+@startuml webmail
+node client_machine as "Machine utilisateur" {
+  agent client as "Navigateur"
+}
+cloud Internet
+node gmail_server as "Machine Serveur" {
+  node http_server as "Serveur HTTP" {
+    component webmail as "Webmail"
+  }
+  database mailboxes as "Boîtes emails" {
+    artifact mailbox as "maboite@gmail.com"
+  }
+  node smtp_server as "Serveur SMTP" {
+    node smtp_receiver as "Récepteur SMTP"
+    queue q1 as "File d'attente"
+    node smtp_sender as "Émetteur SMTP"
+  }
+}
+
+client -- Internet : HTTPS
+webmail -- mailbox
+Internet -- webmail : HTTPS
+webmail -- smtp_receiver
+smtp_receiver -- q1
+q1 -- smtp_sender
+smtp_receiver -- mailbox
+Internet -- smtp_sender : SMTP
+Internet -- smtp_receiver : SMTP
+@enduml
