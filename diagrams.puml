@@ -1,0 +1,111 @@
+@startuml seq_http_simple
+hide footbox
+
+actor user as "Utilisateur"
+participant browser as "Navigateur"
+participant server as "Serveur HTTP"
+database db as "SGBD"
+
+user -> browser : URL
+activate browser #LightCoral
+browser -> server : GET /url
+activate server #LightBlue
+server -> db : get data
+activate db #LightBlue
+db --> server
+deactivate db
+server -> server : process data
+server -> server : generate HTML
+server --> browser
+deactivate server
+browser --> user
+deactivate browser
+@enduml
+
+@startuml seq_http_microservices
+hide footbox
+
+actor user as "Utilisateur"
+participant browser as "Navigateur"
+participant rp as "Reverse Proxy"
+participant app1 as "Application 1"
+participant app2 as "Application 2"
+participant app3 as "Application 3"
+database db as "SGBD"
+
+user -> browser : URL
+activate browser #LightCoral
+browser -> rp : POST /url
+activate rp #LightBlue
+rp -> app1
+activate app1 #LightBlue
+app1 -> db : store data
+activate db #LightBlue
+db --> app1
+deactivate db
+app1 -> app2 : delegate processing
+activate app2 #LightBlue
+app2 --> app1
+deactivate app2
+app1 -> app3 : delegate processing
+activate app3 #LightBlue
+app3 -> db : get data
+activate db #LightBlue
+db --> app3
+deactivate db
+app3 --> app1
+deactivate app3
+app1 -> app1 : process data
+app1 -> app1 : generate HTML
+app1 --> rp
+deactivate app1
+rp --> browser
+deactivate rp
+browser --> user
+deactivate browser
+@enduml
+
+@startuml seq_msg_microservices
+hide footbox
+
+actor user as "Utilisateur"
+participant browser as "Navigateur"
+participant rp as "Reverse Proxy"
+participant app1 as "Application 1"
+database db as "SGBD"
+participant app2 as "Application 2"
+participant app3 as "Application 3"
+participant broker as "Message broker"
+
+user -> browser : URL
+activate browser #LightCoral
+browser -> rp : POST /url
+activate rp #LightBlue
+rp -> app1
+activate app1 #LightBlue
+app1 -> db : store data
+activate db #LightBlue
+db --> app1
+deactivate db
+app1 ->> broker : message pour application 2
+app1 ->> broker : message pour application 3
+app1 -> app1 : process data
+app1 -> app1 : generate HTML
+app1 --> rp
+deactivate app1
+rp --> browser
+deactivate rp
+browser --> user
+deactivate browser
+...
+broker ->> app2 : message pour application 2
+activate app2 #LightBlue
+broker ->> app3 : message pour application 3
+activate app3 #LightBlue
+app3 -> db : get data
+activate db #LightBlue
+deactivate app2
+db --> app3
+deactivate db
+deactivate app3
+@enduml
