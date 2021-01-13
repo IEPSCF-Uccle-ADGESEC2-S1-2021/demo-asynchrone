@@ -109,3 +109,50 @@ db --> app3
 deactivate db
 deactivate app3
 @enduml
+
+@startuml async_pattern_pipe
+left to right direction
+
+agent sender as "émetteur"
+queue q1 as "file d'attente"
+component proc1 as "traitement #1"
+queue q2 as "file d'attente"
+component proc2 as "traitement #2"
+queue q3 as "file d'attente"
+component proc3 as "traitement #3"
+sender --> q1
+q1 --> proc1
+proc1 --> q2
+q2 --> proc2
+proc2 --> q3
+q3 --> proc3
+@enduml
+
+@startuml async_pattern_publish_subscribe
+left to right direction
+
+agent sender as "émetteur"
+queue q1 as "file d'attente"
+component proc1 as "traitement #1"
+component proc2 as "traitement #2"
+component proc3 as "traitement #3"
+sender --> q1
+q1 --> proc1
+q1 --> proc2
+q1 --> proc3
+@enduml
+
+@startuml async_pattern_bidirectional
+left to right direction
+
+agent sender as "émetteur"
+queue q1 as "file d'attente"
+component proc1 as "traitement"
+queue q2 as "file d'attente"
+agent receiver as "récepteur"
+
+sender --> q1
+q1 --> proc1
+q2 <-- proc1
+receiver <-- q2
+@enduml
